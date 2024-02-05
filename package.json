@@ -1,0 +1,33 @@
+{
+  "name": "react-dnd",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "keywords": [],
+  "author": "Ramadan",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/uuid": "9.0.8",
+    "parcel": "2.11.0",
+    "process": "^0.11.10"
+  },
+  "dependencies": {
+    "@emotion/react": "11.11.3",
+    "@emotion/styled": "11.11.0",
+    "@mui/material": "5.15.6",
+    "@types/react": "18.2.48",
+    "@types/react-dom": "18.2.18",
+    "immutability-helper": "3.1.1",
+    "lodash-es": "4.17.21",
+    "prettier": "3.2.4",
+    "react": "18.2.0",
+    "react-dnd": "16.0.1",
+    "react-dnd-html5-backend": "16.0.1",
+    "react-dom": "18.2.0",
+    "uuid": "9.0.1"
+  }
+}

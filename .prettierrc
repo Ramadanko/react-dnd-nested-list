@@ -1,0 +1,19 @@
+{
+  "printWidth": 120,
+  "semi": true,
+  "singleQuote": true,
+  "jsxSingleQuote": false,
+  "useTabs": false,
+  "bracketSpacing": true,
+  "bracketSameLine": true,
+  "endOfLine": "lf",
+  "importOrder": [
+    "react|^react|@mui/material|use-context-selector|<THIRD_PARTY_MODULES>",
+    ".*(interfaces|types|context|redux)$",
+    "^[./|../]|routeUtils|AppProvider|query-services",
+    "components|containers",
+    "modules|utils",
+    ".*\\.(css|scss|styled)$"
+  ],
+  "importOrderSeparation": true
+}
