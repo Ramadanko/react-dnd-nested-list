@@ -1,5 +1,5 @@
 import { createContext, useState, FC } from 'react';
-import { rootNode } from './RootNode';
+import { getRootNode } from './RootNode';
 import { get } from 'lodash-es';
 import { indicatorValue } from './DraggableDroppableNode';
 import { INode } from './types';
@@ -54,7 +54,7 @@ const expandAllNodes = (rootNode: INode, expandedNodes = {}) => {
 };
 
 const TreeProvider: FC<any> = ({ children }) => {
-  const [allNodes, setAllNodes] = useState(rootNode);
+  const [allNodes, setAllNodes] = useState(getRootNode());
   const [expandedNodes, setExpandedNodes] = useState({});
   const [areAllNodesExpanded, setAreAllNodesExpanded] = useState(false);
 

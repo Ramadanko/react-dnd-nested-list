@@ -1,4 +1,5 @@
 import { INode } from './types';
+import { v4 as uuidV4 } from 'uuid';
 
 export const rootNode: INode = {
   id: '1',
@@ -94,5 +95,61 @@ export const rootNode: INode = {
         },
       ],
     },
+
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 1',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Item 11',
+      parentId: '2',
+    },
   ],
+};
+
+const generateUniqueIds = (node: INode) => {
+  node.children.forEach((item) => {
+    item.id = uuidV4();
+    if (item.children) {
+      generateUniqueIds(item);
+    }
+  });
+};
+
+export const getRootNode = () => {
+  const root = structuredClone(rootNode);
+  generateUniqueIds(root);
+  return root;
 };
