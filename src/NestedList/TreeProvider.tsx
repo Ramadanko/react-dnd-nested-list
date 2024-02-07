@@ -1,11 +1,11 @@
 import { createContext, useState, FC } from 'react';
-import { getRootNode } from './RootNode';
+import { getRootNode, rootNode } from './RootNode';
 import { get } from 'lodash-es';
 import { indicatorValue } from './DraggableDroppableNode';
 import { INode } from './types';
 
 interface ITreeContext {
-  allNodes: any;
+  rootNode: INode;
   updateTree: Function;
   expandedNodes: {
     [key: string]: string;
@@ -17,7 +17,7 @@ interface ITreeContext {
 }
 
 export const TreeContext = createContext<ITreeContext>({
-  allNodes: {},
+  rootNode,
   updateTree: () => {},
   expandedNodes: {},
   expandNode: () => {},
@@ -54,13 +54,14 @@ const expandAllNodes = (rootNode: INode, expandedNodes = {}) => {
 };
 
 const TreeProvider: FC<any> = ({ children }) => {
-  const [allNodes, setAllNodes] = useState(getRootNode());
+  const [rootNode, setAllNodes] = useState(getRootNode());
   const [expandedNodes, setExpandedNodes] = useState({});
   const [areAllNodesExpanded, setAreAllNodesExpanded] = useState(false);
 
   const updateTree = (dragIndex: string, hoverIndex: string, position: indicatorValue) => {
+    console.log({ dragIndex, hoverIndex });
     if (!dragIndex || !hoverIndex) return;
-    const clonedNodes = structuredClone(allNodes);
+    const clonedNodes = structuredClone(rootNode);
     let areItemsInTheSameArray = dragIndex.slice(0, -1) === hoverIndex.slice(0, -1);
 
     const draggedItem = getItemWithIndex(dragIndex, clonedNodes);
@@ -107,7 +108,7 @@ const TreeProvider: FC<any> = ({ children }) => {
       setAreAllNodesExpanded(false);
       setExpandedNodes({});
     } else {
-      const expandedNodes = expandAllNodes(allNodes);
+      const expandedNodes = expandAllNodes(rootNode);
       setAreAllNodesExpanded(true);
       setExpandedNodes(() => expandedNodes);
     }
@@ -116,7 +117,7 @@ const TreeProvider: FC<any> = ({ children }) => {
   return (
     <TreeContext.Provider
       value={{
-        allNodes,
+        rootNode,
         updateTree,
         expandedNodes,
         expandNode,

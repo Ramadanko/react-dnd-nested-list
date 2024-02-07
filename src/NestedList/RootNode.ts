@@ -98,42 +98,42 @@ export const rootNode: INode = {
 
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 50',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 60',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 70',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 80',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 90',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 100',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Product 1',
+      name: 'Product 110',
       parentId: '2',
     },
     {
       id: '3',
-      name: 'Item 11',
+      name: 'Product 120',
       parentId: '2',
     },
   ],

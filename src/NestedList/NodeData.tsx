@@ -7,6 +7,7 @@ const borders: CSSProperties = {
 const rowDataStyle: CSSProperties = {
   boxSizing: 'border-box',
   marginTop: '-1px',
+  padding: '12px',
 };
 
 const stackStyle = {
@@ -44,8 +45,6 @@ const NodeData: FC<INodeData> = (props) => {
     expandNode = () => {},
     collapseNode = () => {},
   } = props;
-  const nodeLevel = renderIndex.length;
-  const padding = `12px 12px 12px ${nodeLevel * 12}px`;
   const defaultDragRef = dragRef ?? useRef(null);
   const hasChildren = Boolean(node?.children?.length);
   const allBorders = hasChildren ? {} : borders;
@@ -56,7 +55,7 @@ const NodeData: FC<INodeData> = (props) => {
   const toggleChildren = () => (isExpanded ? collapseNode(node) : expandNode(node));
 
   return (
-    <div className="node-data" style={{ ...rowDataStyle, padding, opacity, ...allBorders }}>
+    <div className="node-data" style={{ ...rowDataStyle, opacity, ...allBorders }}>
       <div className="row-data" style={stackStyle}>
         <span style={handleStyle} ref={defaultDragRef} />
         <div>{node?.name}</div>

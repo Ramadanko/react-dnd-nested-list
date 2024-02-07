@@ -1,10 +1,10 @@
 import { useContext } from 'react';
 import { TreeContext } from './TreeProvider';
-import { IParagraph } from './types';
+import { INode } from './types';
 import DraggableDroppableNode from './DraggableDroppableNode';
 
 const Tree = () => {
-  const { allNodes, areAllNodesExpanded, toggleAllNodes = () => {} } = useContext(TreeContext);
+  const { rootNode, areAllNodesExpanded, toggleAllNodes = () => {} } = useContext(TreeContext);
   const expandText = areAllNodesExpanded ? 'Collapse all' : 'Expand all';
 
   return (
@@ -12,7 +12,7 @@ const Tree = () => {
       <div>
         <button onClick={toggleAllNodes}>{expandText}</button>
       </div>
-      {allNodes?.children?.map((node: IParagraph, index: number) => {
+      {rootNode?.children?.map((node: INode, index: number) => {
         const key = index + 1;
         return (
           <DraggableDroppableNode
