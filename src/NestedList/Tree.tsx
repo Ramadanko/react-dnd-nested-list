@@ -12,9 +12,9 @@ const Tree = () => {
       <div>
         <button onClick={toggleAllNodes}>{expandText}</button>
       </div>
-      {rootNode?.children?.map((node: INode, index: number) => {
-        return <DraggableDroppableNode node={node} key={node.id} index={index}/>;
-      })}
+      {rootNode?.children?.map((node: INode, index: number) => (
+        <DraggableDroppableNode node={node} key={node.id} index={index} />
+      ))}
     </>
   );
 };

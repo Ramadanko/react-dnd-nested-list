@@ -4,8 +4,16 @@ import { INode } from './types';
 import { TreeContext } from './TreeProvider';
 import NodeData from './NodeData';
 import DropIndicator from './DropIndicator';
+import {
+  INITIAL_POSITION,
+  IndicatorValues,
+  isSiblingNode,
+  isNextNode,
+  isContainerNode,
+  isPrevNode,
+  isParentNode,
+} from './util';
 
-const START_INDEX = 100;
 type IProps = {
   index: number;
   node: INode;
@@ -17,47 +25,6 @@ type IProps = {
 const containerStyles: CSSProperties = {
   margin: '16px',
   position: 'relative',
-};
-
-const INITIAL_POSITION = 'top';
-export type indicatorValue = 'top' | 'middle' | 'bottom' | 'none';
-
-const isContainerNode = (node: INode) => {
-  return Boolean(node.children);
-};
-
-export const isSiblingNode = (draggedItem: INode, dropItem: INode) => {
-  // we can rely on parentId for each node if it exists
-  let lastIndexOfBracket = draggedItem.accessPath.lastIndexOf('[');
-  const dragItemContainerPath = draggedItem.accessPath.slice(0, lastIndexOfBracket);
-  lastIndexOfBracket = dropItem.accessPath.lastIndexOf('[');
-  const dropItemContainerPath = dropItem.accessPath.slice(0, lastIndexOfBracket);
-  return dragItemContainerPath === dropItemContainerPath;
-};
-
-export const extractIndexes = (draggedItem: INode, dropItem: INode) => {
-  let lastIndexOfBracket = draggedItem.accessPath.lastIndexOf('[');
-  const dragIndex = parseInt(draggedItem.accessPath.slice(lastIndexOfBracket + 1).replace(']', ''));
-  lastIndexOfBracket = dropItem.accessPath.lastIndexOf('[');
-  const dropIndex = parseInt(dropItem.accessPath.slice(lastIndexOfBracket + 1).replace(']', ''));
-  return { dragIndex, dropIndex };
-};
-
-const isPrevNode = (draggedItem: INode, dropItem: INode) => {
-  const { dragIndex, dropIndex } = extractIndexes(draggedItem, dropItem);
-  return dragIndex - dropIndex === 1;
-};
-
-const isNextNode = (draggedItem: INode, dropItem: INode) => {
-  const { dragIndex, dropIndex } = extractIndexes(draggedItem, dropItem);
-  return dropIndex - dragIndex === 1;
-};
-
-const isParentNode = (draggedItem: INode, dropItem: INode) => {
-  const dragItemParentPath = draggedItem.accessPath.split('.');
-  dragItemParentPath.pop();
-  const dragItemParentPathString = dragItemParentPath.join('.');
-  return dragItemParentPathString === dropItem.accessPath;
 };
 
 const getDropIndicatorPosition = (monitor: DropTargetMonitor, node: any, ref: any, isNodeExpanded = false) => {
@@ -112,11 +79,10 @@ const getDropIndicatorPosition = (monitor: DropTargetMonitor, node: any, ref: an
 const DraggableDroppableNode = (props: IProps) => {
   const ref = useRef(null);
   const { updateTree, expandedNodes, expandNode, collapseNode } = useContext(TreeContext);
-  const { node, index = 0, parentIndex, isLastItem = false, parentPath = '' } = props;
+  const { node, index = 0, isLastItem = false, parentPath = '' } = props;
   const isNodeExpanded = Boolean(expandedNodes[node.id]);
-  const [dropPreviewPosition, setDropPreviewPosition] = useState<indicatorValue>('top');
+  const [dropPreviewPosition, setDropPreviewPosition] = useState<IndicatorValues>('top');
   node.accessPath = `${parentPath}.children[${index}]`;
-  node.renderIndex = parentIndex !== undefined ? `${parentIndex}${index}` : (index + START_INDEX).toString();
 
   const [{ handlerId, draggedItem, isOverCurrent }, drop] = useDrop({
     accept: 'any',
@@ -175,12 +141,7 @@ const DraggableDroppableNode = (props: IProps) => {
   drop(preview(ref));
 
   return (
-    <div
-      ref={ref}
-      className="node-item"
-      style={rowItemStyles}
-      data-handler-id={handlerId}
-      data-render-index={node.renderIndex}>
+    <div ref={ref} className="node-item" style={rowItemStyles} data-handler-id={handlerId}>
       {showNewDropPosition && dropPreviewPosition !== 'none' ? (
         <DropIndicator topPosition={dropPreviewPosition} />
       ) : null}
@@ -192,7 +153,6 @@ const DraggableDroppableNode = (props: IProps) => {
         expandNode={expandNode}
         collapseNode={collapseNode}
         isExpanded={isNodeExpanded}
-        renderIndex={node.renderIndex}
       />
       {isNodeExpanded &&
         node?.children?.map((child: any, index) => {
@@ -203,7 +163,6 @@ const DraggableDroppableNode = (props: IProps) => {
               key={child.id}
               index={index}
               isLastItem={isLastItem}
-              parentIndex={node.renderIndex}
               parentPath={node.accessPath}
             />
           );

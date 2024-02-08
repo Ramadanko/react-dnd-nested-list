@@ -25,7 +25,6 @@ const handleStyle = {
 
 interface INodeData {
   node: INode;
-  renderIndex: string;
   dragRef: any;
   opacity: number;
   isLastItem: boolean;
@@ -38,7 +37,6 @@ const NodeData: FC<INodeData> = (props) => {
   const {
     dragRef,
     node,
-    renderIndex = '',
     opacity = 1,
     isLastItem = false,
     isExpanded = false,

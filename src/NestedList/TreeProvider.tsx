@@ -1,20 +1,8 @@
 import { createContext, useState, FC } from 'react';
 import { getRootNode, rootNode } from './RootNode';
 import { get } from 'lodash-es';
-import { extractIndexes, indicatorValue, isSiblingNode } from './DraggableDroppableNode';
-import { INode } from './types';
-
-interface ITreeContext {
-  rootNode: INode;
-  updateTree: Function;
-  expandedNodes: {
-    [key: string]: string;
-  };
-  expandNode: Function;
-  collapseNode: Function;
-  toggleAllNodes: () => void;
-  areAllNodesExpanded: boolean;
-}
+import { extractIndexes, IndicatorValues, isSiblingNode } from './util';
+import { INode, ITreeContext } from './types';
 
 export const TreeContext = createContext<ITreeContext>({
   rootNode,
@@ -51,7 +39,7 @@ const TreeProvider: FC<any> = ({ children }) => {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [areAllNodesExpanded, setAreAllNodesExpanded] = useState(false);
 
-  const updateTree = (draggedNode: INode, hoveredNode: INode, position: indicatorValue) => {
+  const updateTree = (draggedNode: INode, hoveredNode: INode, position: IndicatorValues) => {
     const clonedNodes = structuredClone(rootNode);
     const areItemsInTheSameArray = isSiblingNode(draggedNode, hoveredNode);
     const { dragIndex, dropIndex } = extractIndexes(draggedNode, hoveredNode);
