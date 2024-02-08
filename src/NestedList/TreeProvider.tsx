@@ -1,7 +1,7 @@
 import { createContext, useState, FC } from 'react';
 import { getRootNode, rootNode } from './RootNode';
 import { get } from 'lodash-es';
-import { indicatorValue } from './DraggableDroppableNode';
+import { extractIndexes, indicatorValue, isSiblingNode } from './DraggableDroppableNode';
 import { INode } from './types';
 
 interface ITreeContext {
@@ -26,21 +26,14 @@ export const TreeContext = createContext<ITreeContext>({
   areAllNodesExpanded: false,
 });
 
-const getChildItems = (path: string, object: any) => {
-  if (path === '') {
-    return object.children;
-  }
-  const item = getItemWithIndex(path, object);
-  return item.children;
+export const getContainerPath = (node: INode) => {
+  let lastIndexOfBracket = node.accessPath.lastIndexOf('[');
+  return node.accessPath.slice(0, lastIndexOfBracket);
 };
 
-const getItemWithIndex = (index: string, object: any) => {
-  let itemPath = '';
-  const draggedPathArray = index.split('');
-  draggedPathArray.forEach((i, index) => {
-    itemPath = itemPath + `${index > 0 ? '.' : ''}children[${parseInt(i) - 1}]`;
-  });
-  return get(object, itemPath);
+const extractItem = (path: string, object: any) => {
+  const pathString = path[0] === '.' ? path.slice(1) : path;
+  return get(object, pathString);
 };
 
 const expandAllNodes = (rootNode: INode, expandedNodes = {}) => {
@@ -58,37 +51,37 @@ const TreeProvider: FC<any> = ({ children }) => {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [areAllNodesExpanded, setAreAllNodesExpanded] = useState(false);
 
-  const updateTree = (dragIndex: string, hoverIndex: string, position: indicatorValue) => {
-    console.log({ dragIndex, hoverIndex });
-    if (!dragIndex || !hoverIndex) return;
+  const updateTree = (draggedNode: INode, hoveredNode: INode, position: indicatorValue) => {
     const clonedNodes = structuredClone(rootNode);
-    let areItemsInTheSameArray = dragIndex.slice(0, -1) === hoverIndex.slice(0, -1);
+    const areItemsInTheSameArray = isSiblingNode(draggedNode, hoveredNode);
+    const { dragIndex, dropIndex } = extractIndexes(draggedNode, hoveredNode);
 
-    const draggedItem = getItemWithIndex(dragIndex, clonedNodes);
-    const draggedItemPositionInArray = parseInt(dragIndex[dragIndex.length - 1]) - 1;
-    const draggedItemParentContainer: Array<any> = getChildItems(dragIndex.slice(0, -1), clonedNodes);
+    const draggedItemParentContainer = extractItem(getContainerPath(draggedNode), clonedNodes);
+    const draggedItem = extractItem(draggedNode.accessPath, clonedNodes);
 
-    const hoveredItem = getItemWithIndex(hoverIndex, clonedNodes);
-    const hoveredItemPositionInArray = parseInt(hoverIndex[hoverIndex.length - 1]) - 1;
-    const hoveredItemParentContainer: Array<any> = getChildItems(hoverIndex.slice(0, -1), clonedNodes);
-    draggedItemParentContainer.splice(draggedItemPositionInArray, 1);
-    let newPosition;
+    const hoveredItemParentContainer = extractItem(getContainerPath(hoveredNode), clonedNodes);
+    const hoveredItem = extractItem(hoveredNode.accessPath, clonedNodes);
+
+    // remove draggedItem from array
+    draggedItemParentContainer.splice(dragIndex, 1);
+
+    let newPosition: number;
 
     if (position !== 'middle') {
       if (areItemsInTheSameArray) {
-        hoveredItemParentContainer.forEach((item, index) => {
+        hoveredItemParentContainer.forEach((item: INode, index: number) => {
           if (item.id === hoveredItem.id) {
             newPosition = position === 'top' ? index : index + 1;
           }
         });
       } else {
-        newPosition = position === 'top' ? hoveredItemPositionInArray : hoveredItemPositionInArray + 1;
+        newPosition = position === 'top' ? dropIndex : dropIndex + 1;
       }
       hoveredItemParentContainer.splice(newPosition, 0, draggedItem);
     } else {
+      // adding to empty list
       hoveredItem.children.push(draggedItem);
     }
-
     setAllNodes(() => structuredClone(clonedNodes));
   };
   const expandNode = (node: INode) => {

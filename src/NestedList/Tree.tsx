@@ -13,14 +13,7 @@ const Tree = () => {
         <button onClick={toggleAllNodes}>{expandText}</button>
       </div>
       {rootNode?.children?.map((node: INode, index: number) => {
-        const key = index + 1;
-        return (
-          <DraggableDroppableNode
-            node={{ ...node, renderIndex: (index + 1).toString() }}
-            key={key.toString()}
-            index={index}
-          />
-        );
+        return <DraggableDroppableNode node={node} key={node.id} index={index}/>;
       })}
     </>
   );
