@@ -8,6 +8,21 @@ export const rootNode: INode = {
   parentId: 'root',
   children: [
     {
+      id: '3',
+      name: 'Product 50',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 60',
+      parentId: '2',
+    },
+    {
+      id: '3',
+      name: 'Product 70',
+      parentId: '2',
+    },
+    {
       id: '2',
       name: 'Container one',
       parentId: '1',
@@ -94,22 +109,6 @@ export const rootNode: INode = {
           ],
         },
       ],
-    },
-
-    {
-      id: '3',
-      name: 'Product 50',
-      parentId: '2',
-    },
-    {
-      id: '3',
-      name: 'Product 60',
-      parentId: '2',
-    },
-    {
-      id: '3',
-      name: 'Product 70',
-      parentId: '2',
     },
     {
       id: '3',

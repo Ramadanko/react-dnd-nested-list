@@ -11,11 +11,5 @@ export type INode = {
 export interface ITreeContext {
   rootNode: INode;
   updateTree: Function;
-  expandedNodes: {
-    [key: string]: string;
-  };
-  expandNode: Function;
-  collapseNode: Function;
-  toggleAllNodes: () => void;
-  areAllNodesExpanded: boolean;
+  toggleExpandedNodes: Function;
 }

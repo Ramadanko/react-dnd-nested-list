@@ -1,4 +1,4 @@
-import { CSSProperties, useContext, useRef, useState } from 'react';
+import { CSSProperties, useContext, useRef, useState, useEffect } from 'react';
 import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { INode } from './types';
 import { TreeContext } from './TreeProvider';
@@ -12,7 +12,11 @@ import {
   isContainerNode,
   isPrevNode,
   isParentNode,
+  getDraggableDroppableStyles,
 } from './util';
+import { EXPAND_COLLAPSE_ALL_NODES } from './CustomEvents';
+
+type IExpandChildItems = boolean;
 
 type IProps = {
   index: number;
@@ -20,6 +24,7 @@ type IProps = {
   parentIndex?: number | string;
   isLastItem?: boolean;
   parentPath?: string;
+  expandChildItems?: boolean;
 };
 
 const containerStyles: CSSProperties = {
@@ -78,10 +83,11 @@ const getDropIndicatorPosition = (monitor: DropTargetMonitor, node: any, ref: an
 
 const DraggableDroppableNode = (props: IProps) => {
   const ref = useRef(null);
-  const { updateTree, expandedNodes, expandNode, collapseNode } = useContext(TreeContext);
-  const { node, index = 0, isLastItem = false, parentPath = '' } = props;
-  const isNodeExpanded = Boolean(expandedNodes[node.id]);
+  const { updateTree, toggleExpandedNodes } = useContext(TreeContext);
+  const { node, index = 0, isLastItem = false, parentPath = '', expandChildItems = false } = props;
   const [dropPreviewPosition, setDropPreviewPosition] = useState<IndicatorValues>('top');
+  const [isNodeExpanded, setIsNodeExpanded] = useState<IExpandChildItems>(expandChildItems);
+  const [passExpandToChildItems, setPassExpandToChildItems] = useState(false);
   node.accessPath = `${parentPath}.children[${index}]`;
 
   const [{ handlerId, draggedItem, isOverCurrent }, drop] = useDrop({
@@ -108,7 +114,7 @@ const DraggableDroppableNode = (props: IProps) => {
       if (!ref.current || !isOverCurrent) return;
       // if not hovering on itself
       if (item.id === node.id) return;
-      const isBefore = getDropIndicatorPosition(monitor, node, ref, isNodeExpanded) ?? 'top';
+      const isBefore = getDropIndicatorPosition(monitor, node, ref, Boolean(isNodeExpanded)) ?? 'top';
       if (isBefore !== dropPreviewPosition) {
         setDropPreviewPosition(() => isBefore);
       }
@@ -126,19 +132,31 @@ const DraggableDroppableNode = (props: IProps) => {
     },
   });
 
+  const toggleChildNodes = (value: boolean, passDown = false) => {
+    const newValue = value !== undefined ? value : !isNodeExpanded;
+    setIsNodeExpanded(newValue);
+    setPassExpandToChildItems(passDown);
+    toggleExpandedNodes(node.id);
+  };
+
+  const handler = (e: CustomEvent) => toggleChildNodes(e.detail, true);
+
   const opacity = isDragging ? 0.5 : 1;
-  const rowItemStyles = node.children
-    ? {
-        ...containerStyles,
-        opacity,
-        border: '1px solid black',
-      }
-    : { ...containerStyles, opacity };
+  const rowItemStyles = getDraggableDroppableStyles({ isDragging, isNodeExpanded });
   const showNewDropPosition = isOverCurrent && draggedItem?.id !== node.id;
 
   // we're telling React-dnd that this ref var/object/element is going to be used as droppable source
   // and in the same time it's going to be a preview source
   drop(preview(ref));
+
+  useEffect(() => {
+    // only container nodes listen to events
+    if (!Array.isArray(node.children)) return;
+    window.addEventListener(EXPAND_COLLAPSE_ALL_NODES, handler);
+    return () => {
+      window.removeEventListener(EXPAND_COLLAPSE_ALL_NODES, handler);
+    };
+  });
 
   return (
     <div ref={ref} className="node-item" style={rowItemStyles} data-handler-id={handlerId}>
@@ -150,9 +168,8 @@ const DraggableDroppableNode = (props: IProps) => {
         dragRef={drag}
         opacity={opacity}
         isLastItem={isLastItem}
-        expandNode={expandNode}
-        collapseNode={collapseNode}
         isExpanded={isNodeExpanded}
+        toggleChildNodes={toggleChildNodes}
       />
       {isNodeExpanded &&
         node?.children?.map((child: any, index) => {
@@ -164,6 +181,7 @@ const DraggableDroppableNode = (props: IProps) => {
               index={index}
               isLastItem={isLastItem}
               parentPath={node.accessPath}
+              expandChildItems={passExpandToChildItems}
             />
           );
         })}

@@ -1,17 +1,14 @@
-import { createContext, useState, FC } from 'react';
+import { createContext, useState, FC, useRef, useEffect } from 'react';
 import { getRootNode, rootNode } from './RootNode';
 import { get } from 'lodash-es';
 import { extractIndexes, IndicatorValues, isSiblingNode } from './util';
 import { INode, ITreeContext } from './types';
+import { SET_ARE_ALL_NODES_EXPANDED } from './CustomEvents';
 
 export const TreeContext = createContext<ITreeContext>({
   rootNode,
   updateTree: () => {},
-  expandedNodes: {},
-  expandNode: () => {},
-  collapseNode: () => {},
-  toggleAllNodes: () => {},
-  areAllNodesExpanded: false,
+  toggleExpandedNodes: () => {},
 });
 
 export const getContainerPath = (node: INode) => {
@@ -35,9 +32,9 @@ const expandAllNodes = (rootNode: INode, expandedNodes = {}) => {
 };
 
 const TreeProvider: FC<any> = ({ children }) => {
+  const containerNodes = useRef({});
+  const expandedContainerNodes = useRef({});
   const [rootNode, setAllNodes] = useState(getRootNode());
-  const [expandedNodes, setExpandedNodes] = useState({});
-  const [areAllNodesExpanded, setAreAllNodesExpanded] = useState(false);
 
   const updateTree = (draggedNode: INode, hoveredNode: INode, position: IndicatorValues) => {
     const clonedNodes = structuredClone(rootNode);
@@ -72,39 +69,35 @@ const TreeProvider: FC<any> = ({ children }) => {
     }
     setAllNodes(() => structuredClone(clonedNodes));
   };
-  const expandNode = (node: INode) => {
-    setExpandedNodes((prev) => ({ ...prev, [node.id]: node }));
-  };
 
-  const collapseNode = (node: INode) => {
-    setExpandedNodes((prev) => {
-      delete prev[node.id];
-      return { ...prev };
-    });
-    setAreAllNodesExpanded(false);
-  };
-
-  const toggleAllNodes = () => {
-    if (areAllNodesExpanded) {
-      setAreAllNodesExpanded(false);
-      setExpandedNodes({});
-    } else {
-      const expandedNodes = expandAllNodes(rootNode);
-      setAreAllNodesExpanded(true);
-      setExpandedNodes(() => expandedNodes);
+  const logContainerNodes = (node: INode) => {
+    if (Array.isArray(node.children)) {
+      if (node.nodeType !== 'root') {
+        containerNodes.current[node.id] = node.id;
+      }
+      node.children.forEach((node) => logContainerNodes(node));
     }
   };
+
+  const toggleExpandedNodes = (id: string) => {
+    if (expandedContainerNodes.current[id]) {
+      delete expandedContainerNodes.current[id];
+    } else {
+      expandedContainerNodes.current[id] = id;
+    }
+    const areAllExpanded =
+      Object.keys(expandedContainerNodes.current).length === Object.keys(containerNodes.current).length;
+    window.dispatchEvent(new CustomEvent(SET_ARE_ALL_NODES_EXPANDED, { detail: areAllExpanded }));
+  };
+
+  useEffect(() => logContainerNodes(rootNode), [rootNode]);
 
   return (
     <TreeContext.Provider
       value={{
         rootNode,
         updateTree,
-        expandedNodes,
-        expandNode,
-        collapseNode,
-        areAllNodesExpanded,
-        toggleAllNodes,
+        toggleExpandedNodes,
       }}>
       {children}
     </TreeContext.Provider>

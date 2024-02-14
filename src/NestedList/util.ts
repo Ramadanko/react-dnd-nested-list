@@ -1,4 +1,5 @@
 import { INode } from './types';
+import { CSSProperties } from 'react';
 
 export const INITIAL_POSITION = 'top';
 export type IndicatorValues = 'top' | 'middle' | 'bottom' | 'none';
@@ -39,4 +40,13 @@ export const isParentNode = (draggedItem: INode, dropItem: INode) => {
   dragItemParentPath.pop();
   const dragItemParentPathString = dragItemParentPath.join('.');
   return dragItemParentPathString === dropItem.accessPath;
+};
+
+export const getDraggableDroppableStyles = ({ isDragging = false, isNodeExpanded = false }: any): CSSProperties => {
+  return {
+    margin: '15px 0',
+    opacity: isDragging ? 0.5 : 1,
+    padding: isNodeExpanded ? '15px' : 0,
+    border: isNodeExpanded ? '1px solid #ccc' : 'none',
+  };
 };

@@ -1,15 +1,6 @@
 import { FC, useRef, CSSProperties } from 'react';
 import { INode } from './types';
 
-const borders: CSSProperties = {
-  border: '1px dashed gray',
-};
-const rowDataStyle: CSSProperties = {
-  boxSizing: 'border-box',
-  marginTop: '-1px',
-  padding: '12px',
-};
-
 const stackStyle = {
   display: 'flex',
   gap: 20,
@@ -23,37 +14,34 @@ const handleStyle = {
   cursor: 'grab',
 };
 
+const getStyles = ({ isExpanded = false }): CSSProperties => {
+  return {
+    marginTop: '-1px',
+    boxSizing: 'border-box',
+    padding: isExpanded ? 0 : '15px',
+    border: isExpanded ? 'none' : '1px dashed #ccc',
+  };
+};
+
 interface INodeData {
   node: INode;
   dragRef: any;
   opacity: number;
   isLastItem: boolean;
   isExpanded: boolean;
-  expandNode: Function;
-  collapseNode: Function;
+  toggleChildNodes: Function;
 }
 
 const NodeData: FC<INodeData> = (props) => {
-  const {
-    dragRef,
-    node,
-    opacity = 1,
-    isLastItem = false,
-    isExpanded = false,
-    expandNode = () => {},
-    collapseNode = () => {},
-  } = props;
+  const { dragRef, node, opacity = 1, isLastItem = false, isExpanded = false, toggleChildNodes = () => {} } = props;
   const defaultDragRef = dragRef ?? useRef(null);
   const hasChildren = Boolean(node?.children?.length);
-  const allBorders = hasChildren ? {} : borders;
+  const styles = getStyles({ isExpanded });
   const expandText = !isExpanded ? 'Expand' : 'Collapse';
-  if (isLastItem) {
-    delete allBorders.borderBottom;
-  }
-  const toggleChildren = () => (isExpanded ? collapseNode(node) : expandNode(node));
+  const toggleChildren = () => toggleChildNodes();
 
   return (
-    <div className="node-data" style={{ ...rowDataStyle, opacity, ...allBorders }}>
+    <div className="node-data" style={styles}>
       <div className="row-data" style={stackStyle}>
         <span style={handleStyle} ref={defaultDragRef} />
         <div>{node?.name}</div>
